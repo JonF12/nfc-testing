@@ -13,17 +13,17 @@ monitor.CardInserted += (sender, args) =>
     using var reader = context.ConnectReader(args.ReaderName, SCardShareMode.Direct, SCardProtocol.Raw);
 
     CardInfo.PrintCardDetails(reader);
-    /*using var rsa = TestKeyManager.CreateOrLoadTestKeys();*/
-    /*CardSigner.SignCard(reader, rsa);*/
-    /**/
-    /*if (CardSigner.VerifyCardSignature(reader, rsa))*/
-    /*{*/
-    /*    Console.WriteLine("Signature verified successfully!");*/
-    /*}*/
-    /*else*/
-    /*{*/
-    /*    Console.WriteLine("Signature verification failed!");*/
-    /*}*/
+    using var rsa = TestKeyManager.CreateOrLoadTestKeys();
+    CardSigner.SignCard(reader, rsa);
+
+    if (CardSigner.VerifyCardSignature(reader, rsa))
+    {
+        Console.WriteLine("Signature verified successfully!");
+    }
+    else
+    {
+        Console.WriteLine("Signature verification failed!");
+    }
 };
 
 monitor.CardRemoved += (sender, args) =>

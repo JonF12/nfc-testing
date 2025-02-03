@@ -68,7 +68,6 @@ public class CardSigner
                 throw new InvalidOperationException("Failed to read UID");
 
             Console.WriteLine($"Successfully read UID: {BitConverter.ToString(uid)}");
-
             // Test write with both command types
             Console.WriteLine("Testing write operations...");
             var testData = new byte[] { 0xAA, 0xBB, 0xCC, 0xDD };
