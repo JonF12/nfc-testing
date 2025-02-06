@@ -5,13 +5,11 @@ namespace dotnet;
 
 public class CardSigner
 {
-    private static byte[] CreateAuthenticateCommand() =>
-        new byte[] { 0xFF, 0x0A, 0x00, 0x00, 0x01 };
+    private static byte[] CreateAuthenticateCommand() => new byte[] { 0xFF, 0x0A, 0x00, 0x00, 0x01 };
 
     private static byte[] CreateGetUidCommand() => new byte[] { 0x00, 0xCA, 0x00, 0x00, 0x00 };
 
-    private static byte[] CreateReadCommand(byte page) =>
-        new byte[] { 0xFF, 0xB0, 0x00, page, 0x04 };
+    private static byte[] CreateReadCommand(byte page) => new byte[] { 0xFF, 0xB0, 0x00, page, 0x04 };
 
     private static byte[] CreateWriteBinaryCommand(byte page, byte[] data) =>
         new byte[] { 0xFF, 0xD6, 0x00, page, 0x04 }
@@ -104,11 +102,7 @@ public class CardSigner
 
             // Create and write signature
             var dataToSign = uid.Concat(challenge).ToArray();
-            var signature = signingKey.SignData(
-                dataToSign,
-                HashAlgorithmName.SHA256,
-                RSASignaturePadding.Pkcs1
-            );
+            var signature = signingKey.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             var truncatedSignature = signature.Take(8).ToArray();
 
             // Write signature parts
@@ -117,19 +111,10 @@ public class CardSigner
                 var pageData = new byte[4];
                 Array.Copy(truncatedSignature, i * 4, pageData, 0, 4);
 
-                var signatureWrite = CreateWriteNtagCommand(
-                    (byte)(SIGNATURE_START_PAGE + i),
-                    pageData
-                );
-                Console.WriteLine(
-                    $"Writing signature part {i + 1} to page {SIGNATURE_START_PAGE + i}..."
-                );
+                var signatureWrite = CreateWriteNtagCommand((byte)(SIGNATURE_START_PAGE + i), pageData);
+                Console.WriteLine($"Writing signature part {i + 1} to page {SIGNATURE_START_PAGE + i}...");
 
-                var signResponse = ExecuteCommand(
-                    reader,
-                    signatureWrite,
-                    $"Write Signature Part {i + 1}"
-                );
+                var signResponse = ExecuteCommand(reader, signatureWrite, $"Write Signature Part {i + 1}");
                 if (signResponse == null)
                 {
                     throw new InvalidOperationException($"Failed to write signature part {i + 1}");
@@ -161,14 +146,7 @@ public class CardSigner
             byte[] challenge = new byte[8];
             for (int i = 0; i < 2; i++)
             {
-                var readCommand = new byte[]
-                {
-                    0xFF,
-                    0xB0,
-                    0x00,
-                    (byte)(CHALLENGE_START_PAGE + i),
-                    0x04,
-                };
+                var readCommand = new byte[] { 0xFF, 0xB0, 0x00, (byte)(CHALLENGE_START_PAGE + i), 0x04 };
                 var pageData = ExecuteCommand(reader, readCommand, $"Read Challenge Page {i}");
                 if (pageData == null)
                     return false;
@@ -179,14 +157,7 @@ public class CardSigner
             byte[] storedSignature = new byte[16];
             for (int i = 0; i < 4; i++)
             {
-                var readCommand = new byte[]
-                {
-                    0xFF,
-                    0xB0,
-                    0x00,
-                    (byte)(SIGNATURE_START_PAGE + i),
-                    0x04,
-                };
+                var readCommand = new byte[] { 0xFF, 0xB0, 0x00, (byte)(SIGNATURE_START_PAGE + i), 0x04 };
                 var pageData = ExecuteCommand(reader, readCommand, $"Read Signature Page {i}");
                 if (pageData == null)
                     return false;
@@ -201,12 +172,7 @@ public class CardSigner
             Array.Copy(storedSignature, paddedSignature, storedSignature.Length);
 
             // 6. Verify signature
-            return publicKey.VerifyData(
-                dataToVerify,
-                paddedSignature,
-                HashAlgorithmName.SHA256,
-                RSASignaturePadding.Pkcs1
-            );
+            return publicKey.VerifyData(dataToVerify, paddedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
         catch (Exception ex)
         {
