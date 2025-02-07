@@ -67,7 +67,7 @@ public class DesfireEv3Reader
         return ParseFileSettings(response);
     }
 
-    private byte[] SendCommand(byte command, byte[] parameters = null)
+    private byte[] SendCommand(byte command, byte[]? parameters = null)
     {
         // Build APDU command manually
         var commandBytes = new List<byte>
